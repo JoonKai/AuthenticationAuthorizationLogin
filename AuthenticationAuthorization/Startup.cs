@@ -16,13 +16,12 @@ using System.Text.Json;
 
 namespace AuthenticationAuthorization
 {
+    //가장 기본적인 로그인 인증 처리 데모
     public class Startup
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
-
-            //services.AddAuthentication("Cookies").AddCookie();
+            //로그인 인증처리 서비스 등록
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
         }
 
@@ -39,7 +38,25 @@ namespace AuthenticationAuthorization
             {
                 endpoints.MapGet("/", async context =>
                 {
-                    await context.Response.WriteAsync("Hello .Net");
+                    string content = "<h1>ASP.NET Core 인증과 권한 초간단 코드</h1>";
+                    context.Response.Headers["Content-Type"] = "text/html; charset=utf-8";
+                    await context.Response.WriteAsync(content);
+                });
+                //기본적인 로그인 인증 처리 방법
+                endpoints.MapGet("/Login", async context =>
+                {
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, "User Name")
+                    };
+                    var claimsIdentity = new ClaimsIdentity(claims,"Cookies");
+
+                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+                    await context.SignInAsync("Cookies", claimsPrincipal);
+
+                    context.Response.Headers["Content-Type"] = "text/html; charset=utf-8";
+                    await context.Response.WriteAsync("<h3>로그인완료</h3>");
                 });
             });
         }
